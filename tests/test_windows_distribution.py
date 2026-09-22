@@ -16,6 +16,7 @@ def test_launcher_uses_bundled_app_and_local_only_streamlit_args(monkeypatch, tm
     assert app_path == bundled / "app.py"
     assert args[:2] == ["streamlit", "run"]
     assert str(app_path) in args
+    assert "--global.developmentMode=false" in args
     assert "--server.address=127.0.0.1" in args
     assert "--server.port=8765" in args
     assert "--server.headless=true" in args
