@@ -66,6 +66,25 @@ def test_list_my_records_isolates_windows_user(tmp_path):
     assert [row["titulo"] for row in rows] == ["A"]
 
 
+def test_create_boletim_uses_explicit_author_name(tmp_path):
+    conn = open_db(tmp_path)
+    row = create_boletim(
+        conn,
+        sample_draft(),
+        "USUARIO_WINDOWS",
+        author_name="Maria Aparecida da Silva",
+    )
+    assert row["windows_user"] == "USUARIO_WINDOWS"
+    assert row["autor_original"] == "Maria Aparecida da Silva"
+
+
+def test_update_draft_can_change_author_name(tmp_path):
+    conn = open_db(tmp_path)
+    row = create_boletim(conn, sample_draft(), "MARIA", author_name="Maria A.")
+    updated = update_draft(conn, row["id"], {"autor_original": "Maria Aparecida"})
+    assert updated["autor_original"] == "Maria Aparecida"
+
+
 def test_finalized_record_cannot_be_edited(tmp_path):
     conn = open_db(tmp_path)
     row = create_boletim(conn, sample_draft(), "MARIA")
