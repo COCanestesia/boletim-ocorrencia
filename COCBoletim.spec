@@ -1,14 +1,19 @@
 # -*- mode: python ; coding: utf-8 -*-
 from pathlib import Path
 
-from PyInstaller.utils.hooks import collect_all, collect_data_files, collect_submodules, copy_metadata
+from PyInstaller.utils.hooks import collect_all, collect_submodules, copy_metadata
 
 streamlit_datas, streamlit_binaries, streamlit_hidden = collect_all("streamlit")
 reportlab_datas, reportlab_binaries, reportlab_hidden = collect_all("reportlab")
 
+# The Streamlit script is executed dynamically at runtime, so keep the local
+# application as real .py files beside app.py instead of relying on PyInstaller's
+# embedded importer. collect_data_files() is intentionally not used here because
+# boletim_coc is a source-tree package, not an installed distribution.
 local_app_datas = []
-for source, destination in collect_data_files("boletim_coc", include_py_files=True):
-    local_app_datas.append((source, str(Path("appsrc") / destination)))
+for source in Path("boletim_coc").rglob("*.py"):
+    destination = Path("appsrc") / source.parent
+    local_app_datas.append((str(source), str(destination)))
 
 hiddenimports = (
     streamlit_hidden
