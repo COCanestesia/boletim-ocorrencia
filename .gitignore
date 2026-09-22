@@ -1,0 +1,17 @@
+.worktrees/
+.superpowers/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.db
+*.sqlite
+*.sqlite3
+data/
+anexos/
+recebidos/
+exportados/
+logs/
+.env
+.streamlit/secrets.toml
