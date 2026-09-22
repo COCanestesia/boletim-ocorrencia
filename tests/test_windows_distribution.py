@@ -29,6 +29,7 @@ def test_pyinstaller_spec_collects_streamlit_and_local_app():
     source = Path("COCBoletim.spec").read_text(encoding="utf-8")
     assert 'collect_all("streamlit")' in source
     assert 'collect_submodules("boletim_coc")' in source
+    assert 'collect_data_files("boletim_coc", include_py_files=True)' in source
     assert '("app.py", ".")' in source
     assert 'name="COCBoletim"' in source
     assert "console=False" in source
@@ -49,6 +50,8 @@ def test_windows_build_workflow_builds_and_releases_installer():
     assert "windows-latest" in source
     assert "python -m pytest -q" in source
     assert "pyinstaller --noconfirm --clean COCBoletim.spec" in source
+    assert "Self-test packaged imports" in source
+    assert "COCBoletim.exe --self-test" in source
     assert "Smoke test packaged application" in source
     assert "127.0.0.1:8765/_stcore/health" in source
     assert "ISCC.exe" in source
