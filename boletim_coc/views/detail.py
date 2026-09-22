@@ -10,6 +10,7 @@ from boletim_coc.views.new_record import TIPOS
 def _edit_form(st, conn, row):
     with st.expander("Editar rascunho", expanded=False):
         with st.form(f'edit-{row["id"]}'):
+            autor = st.text_input("Nome do autor *", value=row["autor_original"])
             c1, c2 = st.columns(2)
             data_value = c1.date_input(
                 "Data da ocorrência",
@@ -35,12 +36,13 @@ def _edit_form(st, conn, row):
             submit = st.form_submit_button("Salvar alterações", type="primary", use_container_width=True)
         if submit:
             try:
-                if not all([local.strip(), setor.strip(), tipo.strip(), titulo.strip(), descricao.strip()]):
+                if not all([autor.strip(), local.strip(), setor.strip(), tipo.strip(), titulo.strip(), descricao.strip()]):
                     raise ValueError("Preencha todos os campos obrigatórios.")
                 update_draft(
                     conn,
                     row["id"],
                     {
+                        "autor_original": autor.strip(),
                         "data_ocorrencia": data_value.isoformat(),
                         "hora_ocorrencia": hora_value.strftime("%H:%M"),
                         "local": local.strip(),
