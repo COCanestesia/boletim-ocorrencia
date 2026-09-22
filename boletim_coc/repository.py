@@ -23,8 +23,16 @@ def get_boletim(conn: sqlite3.Connection, boletim_id: str):
     return conn.execute("select * from boletins where id=?", (boletim_id,)).fetchone()
 
 
-def create_boletim(conn: sqlite3.Connection, draft: BoletimDraft, windows_user: str):
+def create_boletim(
+    conn: sqlite3.Connection,
+    draft: BoletimDraft,
+    windows_user: str,
+    author_name: str | None = None,
+):
     draft.validate()
+    author = str(author_name or windows_user).strip()
+    if not author:
+        raise ValueError("Informe o nome do autor.")
     record_id = str(uuid.uuid4())
     stamp = now_iso()
     codigo = next_codigo(conn, draft.data_ocorrencia.year)
@@ -38,7 +46,7 @@ def create_boletim(conn: sqlite3.Connection, draft: BoletimDraft, windows_user: 
         ) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """,
         (
-            record_id, codigo, "local", windows_user, windows_user,
+            record_id, codigo, "local", windows_user, author,
             draft.data_ocorrencia.isoformat(),
             draft.hora_ocorrencia.strftime("%H:%M"),
             draft.local.strip(), draft.setor.strip(), draft.tipo_ocorrencia.strip(),
@@ -81,11 +89,13 @@ def update_draft(conn, boletim_id: str, changes: dict):
     row = get_boletim(conn, boletim_id)
     _assert_editable(row)
     allowed = {
-        "data_ocorrencia", "hora_ocorrencia", "local", "setor", "tipo_ocorrencia",
-        "titulo", "descricao", "consequencias", "pessoas_envolvidas",
+        "autor_original", "data_ocorrencia", "hora_ocorrencia", "local", "setor",
+        "tipo_ocorrencia", "titulo", "descricao", "consequencias", "pessoas_envolvidas",
         "acoes_imediatas", "acoes_preventivas",
     }
     clean = {k: v for k, v in changes.items() if k in allowed}
+    if "autor_original" in clean and not str(clean["autor_original"]).strip():
+        raise ValueError("Informe o nome do autor.")
     if not clean:
         return row
     setters = ", ".join(f"{k}=?" for k in clean)
