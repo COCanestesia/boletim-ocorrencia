@@ -5,15 +5,16 @@ import sys
 
 def test_launcher_uses_bundled_app_and_local_only_streamlit_args(monkeypatch, tmp_path):
     bundled = tmp_path / "bundle"
-    bundled.mkdir()
-    (bundled / "app.py").write_text("# app", encoding="utf-8")
+    appsrc = bundled / "appsrc"
+    appsrc.mkdir(parents=True)
+    (appsrc / "app.py").write_text("# app", encoding="utf-8")
     monkeypatch.setattr(sys, "_MEIPASS", str(bundled), raising=False)
 
-    launcher = importlib.import_module("launcher")
+    launcher = importlib.reload(importlib.import_module("launcher"))
     app_path = launcher.app_script_path()
     args = launcher.streamlit_args(app_path)
 
-    assert app_path == bundled / "app.py"
+    assert app_path == appsrc / "app.py"
     assert args[:2] == ["streamlit", "run"]
     assert str(app_path) in args
     assert "--global.developmentMode=false" in args
@@ -30,7 +31,8 @@ def test_pyinstaller_spec_collects_streamlit_and_local_app():
     assert 'collect_all("streamlit")' in source
     assert 'collect_submodules("boletim_coc")' in source
     assert 'collect_data_files("boletim_coc", include_py_files=True)' in source
-    assert '("app.py", ".")' in source
+    assert '("app.py", "appsrc")' in source
+    assert 'Path("appsrc") / destination' in source
     assert 'name="COCBoletim"' in source
     assert "console=False" in source
 
@@ -50,6 +52,8 @@ def test_windows_build_workflow_builds_and_releases_installer():
     assert "windows-latest" in source
     assert "python -m pytest -q" in source
     assert "pyinstaller --noconfirm --clean COCBoletim.spec" in source
+    assert "Verify physical Streamlit app package" in source
+    assert "verify_packaged_app.py" in source
     assert "Self-test packaged imports" in source
     assert "COCBoletim.exe --self-test" in source
     assert "Smoke test packaged application" in source
