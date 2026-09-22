@@ -2,9 +2,7 @@ name: Build Windows Installer
 
 on:
   push:
-    branches:
-      - main
-      - fix/streamlit-app-import-v1.0.3
+    branches: [main]
   workflow_dispatch:
 
 permissions:
