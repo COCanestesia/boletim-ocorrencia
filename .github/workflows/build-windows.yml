@@ -36,6 +36,10 @@ jobs:
       - name: Build portable application
         run: pyinstaller --noconfirm --clean COCBoletim.spec
 
+      - name: Self-test packaged imports
+        shell: pwsh
+        run: .\dist\COCBoletim\COCBoletim.exe --self-test
+
       - name: Smoke test packaged application
         shell: pwsh
         env:
