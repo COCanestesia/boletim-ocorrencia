@@ -1,8 +1,9 @@
 # -*- mode: python ; coding: utf-8 -*-
-from PyInstaller.utils.hooks import collect_all, collect_submodules, copy_metadata
+from PyInstaller.utils.hooks import collect_all, collect_data_files, collect_submodules, copy_metadata
 
 streamlit_datas, streamlit_binaries, streamlit_hidden = collect_all("streamlit")
 reportlab_datas, reportlab_binaries, reportlab_hidden = collect_all("reportlab")
+local_app_datas = collect_data_files("boletim_coc", include_py_files=True)
 
 hiddenimports = (
     streamlit_hidden
@@ -15,6 +16,7 @@ datas = (
     + reportlab_datas
     + copy_metadata("streamlit", recursive=True)
     + [("app.py", ".")]
+    + local_app_datas
 )
 
 binaries = streamlit_binaries + reportlab_binaries
