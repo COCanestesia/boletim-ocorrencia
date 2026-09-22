@@ -1,3 +1,12 @@
+from pathlib import Path
+import sys
+
+APP_SOURCE_ROOT = Path(__file__).resolve().parent
+APP_SOURCE_ROOT_TEXT = str(APP_SOURCE_ROOT)
+if APP_SOURCE_ROOT_TEXT in sys.path:
+    sys.path.remove(APP_SOURCE_ROOT_TEXT)
+sys.path.insert(0, APP_SOURCE_ROOT_TEXT)
+
 import streamlit as st
 
 from boletim_coc.config import resolve_paths
