@@ -15,6 +15,11 @@ TIPOS = [
 def render(st, conn, paths, windows_user):
     header(st, "Boletim de Ocorrência", "Novo registro · segurança e melhoria contínua")
     with st.form("novo_boletim", clear_on_submit=False):
+        autor = st.text_input(
+            "Nome do autor *",
+            placeholder="Digite o nome completo de quem está registrando a ocorrência",
+        )
+        st.caption("O nome acima será exibido no boletim e no PDF. A conta do Windows é usada apenas internamente.")
         c1, c2 = st.columns(2)
         data = c1.date_input("Data da ocorrência", value=datetime.now().date())
         hora = c2.time_input("Hora da ocorrência", value=datetime.now().time().replace(second=0, microsecond=0))
@@ -39,11 +44,13 @@ def render(st, conn, paths, windows_user):
 
     if save or finish:
         try:
+            if not autor.strip():
+                raise ValueError("Informe o nome do autor.")
             draft = BoletimDraft(
                 data, hora, local, setor, tipo, titulo, descricao,
                 consequencias, pessoas, imediatas, preventivas,
             )
-            row = create_boletim(conn, draft, windows_user)
+            row = create_boletim(conn, draft, windows_user, author_name=autor)
             attachment_rows = []
             for upload in uploads or []:
                 attachment_rows.append(
