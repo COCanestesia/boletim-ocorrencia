@@ -1,9 +1,14 @@
 # -*- mode: python ; coding: utf-8 -*-
+from pathlib import Path
+
 from PyInstaller.utils.hooks import collect_all, collect_data_files, collect_submodules, copy_metadata
 
 streamlit_datas, streamlit_binaries, streamlit_hidden = collect_all("streamlit")
 reportlab_datas, reportlab_binaries, reportlab_hidden = collect_all("reportlab")
-local_app_datas = collect_data_files("boletim_coc", include_py_files=True)
+
+local_app_datas = []
+for source, destination in collect_data_files("boletim_coc", include_py_files=True):
+    local_app_datas.append((source, str(Path("appsrc") / destination)))
 
 hiddenimports = (
     streamlit_hidden
@@ -15,7 +20,7 @@ datas = (
     streamlit_datas
     + reportlab_datas
     + copy_metadata("streamlit", recursive=True)
-    + [("app.py", ".")]
+    + [("app.py", "appsrc")]
     + local_app_datas
 )
 
@@ -24,7 +29,7 @@ binaries = streamlit_binaries + reportlab_binaries
 
 a = Analysis(
     ["launcher.py"],
-    pathex=[],
+    pathex=["."],
     binaries=binaries,
     datas=datas,
     hiddenimports=hiddenimports,
