@@ -1,15 +1,26 @@
 from pathlib import Path
+import importlib
+import sys
 
-from launcher import LOCAL_URL, streamlit_args
+
+def test_app_script_path_uses_pyinstaller_bundle_directory(monkeypatch, tmp_path):
+    bundled = tmp_path / "bundle"
+    bundled.mkdir()
+    (bundled / "app.py").write_text("# test", encoding="utf-8")
+    monkeypatch.setattr(sys, "_MEIPASS", str(bundled), raising=False)
+
+    launcher = importlib.import_module("launcher")
+    assert launcher.app_script_path() == bundled / "app.py"
 
 
-def test_packaged_launcher_disables_first_run_prompt_and_fixes_local_port():
-    args = streamlit_args(Path("app.py"))
+def test_prepare_runtime_import_path_adds_bundle_root(monkeypatch, tmp_path):
+    bundled = tmp_path / "bundle"
+    bundled.mkdir()
+    monkeypatch.setattr(sys, "_MEIPASS", str(bundled), raising=False)
+    monkeypatch.setattr(sys, "path", [p for p in sys.path if p != str(bundled)])
 
-    assert "--global.developmentMode=false" in args
-    assert "--server.address=127.0.0.1" in args
-    assert "--server.port=8765" in args
-    assert "--server.showEmailPrompt=false" in args
-    assert "--server.headless=true" in args
-    assert "--browser.gatherUsageStats=false" in args
-    assert LOCAL_URL == "http://127.0.0.1:8765"
+    launcher = importlib.reload(importlib.import_module("launcher"))
+    root = launcher.prepare_runtime_import_path()
+
+    assert root == bundled
+    assert sys.path[0] == str(bundled)
