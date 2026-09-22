@@ -24,6 +24,7 @@ def streamlit_args(app_path: Path) -> list[str]:
         "streamlit",
         "run",
         str(app_path),
+        "--global.developmentMode=false",
         "--server.address=127.0.0.1",
         f"--server.port={LOCAL_PORT}",
         "--server.headless=true",
@@ -53,6 +54,7 @@ def main() -> int:
     if not app_path.is_file():
         raise FileNotFoundError(f"Arquivo principal não encontrado: {app_path}")
 
+    os.environ.setdefault("STREAMLIT_GLOBAL_DEVELOPMENT_MODE", "false")
     os.environ.setdefault("STREAMLIT_BROWSER_GATHER_USAGE_STATS", "false")
     os.environ.setdefault("STREAMLIT_SERVER_SHOW_EMAIL_PROMPT", "false")
     os.environ.setdefault("PYTHONUTF8", "1")
