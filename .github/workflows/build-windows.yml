@@ -36,6 +36,12 @@ jobs:
       - name: Build portable application
         run: pyinstaller --noconfirm --clean COCBoletim.spec
 
+      - name: Verify physical Streamlit app package
+        shell: pwsh
+        run: |
+          $appsrc = Resolve-Path "dist\COCBoletim\_internal\appsrc"
+          python tests\verify_packaged_app.py $appsrc
+
       - name: Self-test packaged imports
         shell: pwsh
         run: .\dist\COCBoletim\COCBoletim.exe --self-test
