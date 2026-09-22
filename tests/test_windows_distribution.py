@@ -30,9 +30,9 @@ def test_pyinstaller_spec_collects_streamlit_and_local_app():
     source = Path("COCBoletim.spec").read_text(encoding="utf-8")
     assert 'collect_all("streamlit")' in source
     assert 'collect_submodules("boletim_coc")' in source
-    assert 'collect_data_files("boletim_coc", include_py_files=True)' in source
+    assert 'Path("boletim_coc").rglob("*.py")' in source
     assert '("app.py", "appsrc")' in source
-    assert 'Path("appsrc") / destination' in source
+    assert 'Path("appsrc") / source.parent' in source
     assert 'name="COCBoletim"' in source
     assert "console=False" in source
 
