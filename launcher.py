@@ -18,8 +18,15 @@ def bundle_root() -> Path:
     return Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
 
 
-def prepare_runtime_import_path() -> Path:
+def app_source_root() -> Path:
     root = bundle_root()
+    if getattr(sys, "frozen", False) or hasattr(sys, "_MEIPASS"):
+        return root / "appsrc"
+    return root
+
+
+def prepare_runtime_import_path() -> Path:
+    root = app_source_root()
     root_text = str(root)
     if root_text in sys.path:
         sys.path.remove(root_text)
@@ -31,13 +38,16 @@ def verify_runtime_modules() -> None:
     root = prepare_runtime_import_path()
     if getattr(sys, "frozen", False):
         package_init = root / "boletim_coc" / "__init__.py"
+        config_file = root / "boletim_coc" / "config.py"
         if not package_init.is_file():
-            raise RuntimeError(f"Pacote boletim_coc não encontrado no bundle: {package_init}")
+            raise RuntimeError(f"Pacote boletim_coc não encontrado no app físico: {package_init}")
+        if not config_file.is_file():
+            raise RuntimeError(f"Módulo config não encontrado no app físico: {config_file}")
     __import__("boletim_coc.config")
 
 
 def app_script_path() -> Path:
-    return bundle_root() / "app.py"
+    return app_source_root() / "app.py"
 
 
 def streamlit_args(app_path: Path) -> list[str]:
