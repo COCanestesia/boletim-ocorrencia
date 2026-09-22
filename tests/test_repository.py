@@ -78,6 +78,12 @@ def test_create_boletim_uses_explicit_author_name(tmp_path):
     assert row["autor_original"] == "Maria Aparecida da Silva"
 
 
+def test_create_boletim_rejects_blank_explicit_author(tmp_path):
+    conn = open_db(tmp_path)
+    with pytest.raises(ValueError, match="autor"):
+        create_boletim(conn, sample_draft(), "USUARIO_WINDOWS", author_name="   ")
+
+
 def test_update_draft_can_change_author_name(tmp_path):
     conn = open_db(tmp_path)
     row = create_boletim(conn, sample_draft(), "MARIA", author_name="Maria A.")
