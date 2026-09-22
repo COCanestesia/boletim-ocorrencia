@@ -17,7 +17,9 @@ def test_launcher_uses_bundled_app_and_local_only_streamlit_args(monkeypatch, tm
     assert args[:2] == ["streamlit", "run"]
     assert str(app_path) in args
     assert "--server.address=127.0.0.1" in args
-    assert "--server.headless=false" in args
+    assert "--server.port=8765" in args
+    assert "--server.headless=true" in args
+    assert "--server.showEmailPrompt=false" in args
     assert "--server.fileWatcherType=none" in args
     assert "--browser.gatherUsageStats=false" in args
 
@@ -46,6 +48,8 @@ def test_windows_build_workflow_builds_and_releases_installer():
     assert "windows-latest" in source
     assert "python -m pytest -q" in source
     assert "pyinstaller --noconfirm --clean COCBoletim.spec" in source
+    assert "Smoke test packaged application" in source
+    assert "127.0.0.1:8765/_stcore/health" in source
     assert "ISCC.exe" in source
     assert "actions/upload-artifact@v4" in source
     assert "softprops/action-gh-release@v2" in source
